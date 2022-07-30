@@ -8,7 +8,12 @@
           id="name"
           placeholder="Введите наименование товара"
           v-model="query.name"
+          :class="{ 'as-error': error.name }"
+          @input="error.name = false"
         />
+        <p v-if="error.name" class="as-danger">
+          Поле обьязательно для заполнения
+        </p>
       </div>
       <div class="d-flex">
         <label for="description">Описание товара</label>
@@ -25,8 +30,13 @@
           type="text"
           id="image"
           placeholder="Введите ссылку"
-          v-model="query.image"
+          v-model="query.link"
+          :class="{ 'as-error': error.link }"
+          @input="error.link = false"
         />
+        <p v-if="error.link" class="as-danger">
+          Поле обьязательно для заполнения
+        </p>
       </div>
       <div class="d-flex">
         <label for="price">Цена</label>
@@ -36,7 +46,12 @@
           min="0"
           placeholder="Введите цену"
           v-model="query.price"
+          :class="{ 'as-error': error.price }"
+          @input="error.price = false"
         />
+        <p v-if="error.price" class="as-danger">
+          Поле обьязательно для заполнения
+        </p>
       </div>
       <div class="card-footer">
         <button type="submit" class="btn btn-primary" @click="createProduct">
@@ -48,12 +63,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, defineEmits } from "vue";
+import { createProductRequest } from "@/services/products.api";
+
+const emit = defineEmits(["created"]);
 const query = ref({
   name: "",
   description: "",
-  image: "",
+  link: "",
   price: 0,
+});
+
+const error = ref({
+  name: false,
+  link: false,
+  price: false,
 });
 
 const createProduct = () => {
@@ -64,7 +88,27 @@ const createProduct = () => {
     image,
     price,
   };
-  console.log(product);
+  if (!query.value.name.length) {
+    error.value.name = true;
+  }
+  if (!query.value.link.length) {
+    error.value.link = true;
+  }
+  if (!query.value.price) {
+    error.value.price = true;
+  }
+  const isValid = !error.value.name && !error.value.link && !error.value.price;
+  if (isValid) {
+    createProductRequest(product).then((response) => {
+      emit("created", response.data);
+      query.value = {
+        name: "",
+        description: "",
+        image: "",
+        price: 0,
+      };
+    });
+  }
 };
 </script>
 
@@ -129,5 +173,12 @@ button {
 }
 button:hover {
   background: #e0e0e0;
+}
+
+.as-error {
+  border: 1px solid #ff0000;
+}
+.as-danger {
+  color: #ff0000;
 }
 </style>
