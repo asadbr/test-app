@@ -16,6 +16,12 @@
                 {{ product.price }} руб.
               </span>
             </div>
+            <img
+              src="../assets/delete-icon.png"
+              alt="delete"
+              class="as-delete-icon"
+              @click="deleteProductHandler(product.id)"
+            />
           </div>
         </div>
       </div>
@@ -25,7 +31,10 @@
 
 <script setup>
 import { defineAsyncComponent, ref } from "vue";
-import { getProductsRequest } from "@/services/products.api";
+import {
+  deleteProductRequest,
+  getProductsRequest,
+} from "@/services/products.api";
 
 const products = ref([]);
 
@@ -38,6 +47,12 @@ getProducts();
 
 const createProductHandler = (product) => {
   products.value.push(product);
+};
+
+const deleteProductHandler = (id) => {
+  deleteProductRequest(id).then(() => {
+    products.value = products.value.filter((product) => product.id !== id);
+  });
 };
 
 const CreateProduct = defineAsyncComponent(() =>
@@ -56,7 +71,7 @@ const CreateProduct = defineAsyncComponent(() =>
 }
 .d-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(332px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-column-gap: 20px;
   grid-row-gap: 30px;
 }
@@ -66,6 +81,7 @@ const CreateProduct = defineAsyncComponent(() =>
   border-radius: 4px;
   min-width: 332px;
   width: 100%;
+  position: relative;
 }
 .as-product-img {
   width: 100%;
@@ -91,5 +107,19 @@ const CreateProduct = defineAsyncComponent(() =>
 }
 .as-font-size-24 {
   font-size: 24px;
+}
+
+.as-delete-icon {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  opacity: 1;
+  cursor: pointer;
+  z-index: 10;
+  height: 40px;
+  width: 40px;
+}
+.as-delete-icon:hover {
+  opacity: 0.8;
 }
 </style>
